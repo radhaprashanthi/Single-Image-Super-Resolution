@@ -1,6 +1,9 @@
 # Single-Image-Super-Resolution
 Single Image Super-Resolution Using Deep Neural Networks in PyTorch
 
+### Team Members
+Aishwarya Parthasarathy and Radha Prashanthi Aakula Chinna
+
 ### Background and motivation
 During videos calls over low-bandwidth connections or poor receptions, the video appears to be pixelated and or reduced in resolution. We wanted to explore ways using Deep Learning to make clearer images from low-resolution images. This has numerous applications like satellite and aerial image analysis, medical image processing, compressed image/video enhancement etc.
 
