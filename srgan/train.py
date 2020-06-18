@@ -10,7 +10,7 @@ SRGAN
 
 https://towardsdatascience.com/build-a-super-simple-gan-in-pytorch-54ba349920e4
 """
-
+from pathlib import Path
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 # from google.colab import drive
 from torch.utils.data import DataLoader
@@ -22,9 +22,9 @@ from srgan.loss import *
 from srgan.models import *
 from srgan.utils import AverageMeter
 
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 
-writer = SummaryWriter('runs/srgan')
+# writer = SummaryWriter('runs/srgan')
 
 
 def train_model(generator, optimizer_g,
@@ -101,32 +101,6 @@ def train_model(generator, optimizer_g,
 
             ###########################################################################################################
 
-            if epoch % 25 == 0:
-                hr_y = output_to_y_channel(hr)
-                sr_y = output_to_y_channel(sr)
-                psnr = (
-                    peak_signal_noise_ratio(
-                        hr_y.cpu().numpy(),
-                        sr_y.cpu().numpy(),
-                        data_range=255.)
-                )
-                ssim = (
-                    structural_similarity(
-                        hr_y.cpu().numpy(),
-                        sr_y.cpu().numpy(),
-                        data_range=255.)
-                )
-
-                psnr_meter.update(psnr, batch_size)
-                ssim_meter.update(ssim, batch_size)
-
-                print("\n**********************\n")
-                print(psnr_meter)
-                print(ssim_meter)
-                print("\n**********************\n")
-
-                del hr_y, sr_y
-
             del lr, hr, sr
             progress.update()
         print("\n======================\n")
@@ -140,28 +114,37 @@ def train_model(generator, optimizer_g,
     return generator
 
 
-def train():
+def train(root_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
+    
     upscale_factor = 4
     image_channels = 3
     residual_block_channels = 64
     num_residual_blocks = 16
-    generator = Generator(upscale_factor=upscale_factor,
-                          image_channels=image_channels,
-                          residual_block_channels=residual_block_channels,
-                          num_residual_blocks=num_residual_blocks).to(device)
     num_middle_blocks = 7
-    discriminator = Discriminator(
-        image_channels=image_channels,
-        num_middle_blocks=num_middle_blocks).to(device)
+
+    filepath = root_path / "model_checkpoint/aishu/srgan_v0.pth"
+    print(filepath)
+    if filepath.exists():
+        generator, discriminator = load_checkpoint(filepath, device)
+    else:
+        (root_path / "model_checkpoint/aishu/").mkdir(exist_ok=True)
+        generator = Generator(upscale_factor=upscale_factor,
+                            image_channels=image_channels,
+                            residual_block_channels=residual_block_channels,
+                            num_residual_blocks=num_residual_blocks).to(device)
+        
+        discriminator = Discriminator(
+            image_channels=image_channels,
+            num_middle_blocks=num_middle_blocks).to(device)
     vgg_loss = VGG19Loss(i=5, j=4).to(device).eval()
 
     print(f"Generator: {sum(param.numel() for param in generator.parameters())}")
     print(f"Discriminator: {sum(param.numel() for param in discriminator.parameters())}")
 
     train_dataset = SRImageDataset(
-        dataset_dir="/content/drive/My Drive/ML/sr/training_data",
+        dataset_dir=root_path / "training_data",
         crop_size=96
     )
 
@@ -172,8 +155,7 @@ def train():
 
     print(f"Length of train loader: {len(train_dataloader)}")
 
-    save_filepath = "/content/drive/My Drive/ML/sr/model_checkpoint/srgan_v0.pth"
-    load_filepath = "/content/drive/My Drive/ML/sr/model_checkpoint/srgan_v0.pth"
+    
     lr = 1e-4
     optimizer_g = torch.optim.Adam(params=filter(lambda p: p.requires_grad, generator.parameters()),
                                    lr=lr)
@@ -187,8 +169,5 @@ def train():
                             device=device,
                             vgg_loss=vgg_loss,
                             train_dataloader=train_dataloader,
-                            epochs=10, save_freq=5,
-                            filepath=save_filepath)
-
-    if __name__ == '__main__':
-        train()
+                            epochs=500, save_freq=5,
+                            filepath=filepath)
