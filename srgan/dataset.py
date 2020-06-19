@@ -120,7 +120,7 @@ class SRImageDataset(Dataset):
         self.is_valid = is_valid
 
     def __getitem__(self, index):
-        pil_hr_image = Image.open(self.image_filenames[index])
+        pil_hr_image = Image.open(self.image_filenames[index]).convert('RGB')
         if self.is_valid:
             hr_image = valid_hr_transform()(pil_hr_image)
             crop_size = (int(pil_hr_image.height / 4),
