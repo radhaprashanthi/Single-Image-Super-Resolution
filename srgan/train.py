@@ -129,7 +129,7 @@ def train(root_path):
     if filepath.exists():
         generator, discriminator = load_checkpoint(filepath, device)
     else:
-        (root_path / "model_checkpoint/aishu/").mkdir(exist_ok=True)
+        (root_path / "model_checkpoint/aishu/").mkdir(parents=True, exist_ok=True)
         generator = Generator(upscale_factor=upscale_factor,
                             image_channels=image_channels,
                             residual_block_channels=residual_block_channels,
