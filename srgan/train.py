@@ -127,6 +127,7 @@ def train(root_path):
     filepath = root_path / "model_checkpoint/aishu/srgan_v0.pth"
     print(filepath)
     if filepath.exists():
+        print("checkpoint exists... loading...")
         generator, discriminator = load_checkpoint(filepath, device)
     else:
         (root_path / "model_checkpoint/aishu/").mkdir(parents=True, exist_ok=True)
@@ -156,7 +157,7 @@ def train(root_path):
     print(f"Length of train loader: {len(train_dataloader)}")
 
     
-    lr = 1e-4
+    lr = 1e-3
     optimizer_g = torch.optim.Adam(params=filter(lambda p: p.requires_grad, generator.parameters()),
                                    lr=lr)
     optimizer_d = torch.optim.Adam(params=filter(lambda p: p.requires_grad, discriminator.parameters()),
