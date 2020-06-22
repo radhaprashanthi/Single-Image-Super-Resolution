@@ -16,8 +16,8 @@ The aim of our project is to recover or restore a high resolution (HR) image fro
 3. PyTorch
 
 ### Datasets
-1. DIV2k data set - https://data.vision.ee.ethz.ch/cvl/DIV2K/. The data set has 1000 2K resolution images divided into: 800 images for training, 100 images for validation, 100 images for testing. The data set provides both high and low resolution images for 2, 3, and 4 down-scaling factors.
-2. 3000 2K resolution images from random wallpapers
+1. DIV2K data set - https://data.vision.ee.ethz.ch/cvl/DIV2K/. The data set has 1000 2K resolution images divided into: 800 images for training, 100 images for validation, 100 images for testing. The data set provides both high and low resolution images for 2, 3, and 4 down-scaling factors.
+2. Images 4K data set from Kaggle - https://www.kaggle.com/evgeniumakov/images4k. The data set has 2056 4K resolution images used for training.
 
 ### Models
 1. SRResNet
