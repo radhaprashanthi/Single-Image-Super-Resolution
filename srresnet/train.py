@@ -5,7 +5,6 @@ from tqdm.notebook import tqdm
 
 from srresnet.checkpoint import *
 from srresnet.dataset import *
-from srresnet.loss import *
 from srresnet.models import *
 from srresnet.utils import AverageMeter
 
