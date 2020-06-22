@@ -20,7 +20,7 @@ from srgan.checkpoint import *
 from srgan.dataset import *
 from srgan.loss import *
 from srgan.models import *
-from srgan.utils import AverageMeter
+from srgan.utils import *
 
 # from torch.utils.tensorboard import SummaryWriter
 
@@ -54,9 +54,16 @@ def train_model(generator, optimizer_g,
 
     psnr_meter = AverageMeter("PSNR")
     ssim_meter = AverageMeter("SSIM")
-    grad_clip = 2 
+    grad_clip = 2
+
+    best_loss = float("inf")
 
     for epoch in range(epochs):
+
+        if epoch == epochs / 2:
+            adjust_learning_rate(optimizer_g, 0.1)
+            adjust_learning_rate(optimizer_d, 0.1)
+
         generator.train()
         for lr, hr in train_dataloader:
             lr, hr = lr.to(device), hr.to(device)
@@ -122,7 +129,9 @@ def train_model(generator, optimizer_g,
         print(g_add_loss_meter)
         print(d_add_loss_meter)
         print("\n======================\n")
-        if epoch % save_freq == 0:
+        if perceptual_loss.item() < best_loss:
+            print("better loss, saving the gan")
+            best_loss = perceptual_loss.item()
             save_checkpoint(generator, discriminator, filepath)
 
     return generator
