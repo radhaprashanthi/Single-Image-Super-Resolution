@@ -26,6 +26,16 @@ from srgan.utils import AverageMeter
 
 # writer = SummaryWriter('runs/srgan')
 
+def clip_gradient(optimizer, grad_clip):
+    """
+    Clips gradients computed during backpropagation to avoid explosion of gradients.
+    :param optimizer: optimizer with the gradients to be clipped
+    :param grad_clip: clip value
+    """
+    for group in optimizer.param_groups:
+        for param in group['params']:
+            if param.grad is not None:
+                param.grad.data.clamp_(-grad_clip, grad_clip)
 
 def train_model(generator, optimizer_g,
                 discriminator, optimizer_d,
@@ -44,6 +54,7 @@ def train_model(generator, optimizer_g,
 
     psnr_meter = AverageMeter("PSNR")
     ssim_meter = AverageMeter("SSIM")
+    grad_clip = 2 
 
     for epoch in range(epochs):
         generator.train()
@@ -93,6 +104,9 @@ def train_model(generator, optimizer_g,
             # Back-prop loss on Discriminator
             optimizer_d.zero_grad()
             adversarial_loss.backward()
+	    
+            if grad_clip is not None:
+                clip_gradient(optimizer_d, grad_clip)
 
             # Update discriminator
             optimizer_d.step()
