@@ -86,7 +86,7 @@ def train_model(generator, optimizer_g,
             adversarial_loss = adversarial_loss_criterion(fake,
                                                           torch.ones_like(fake))
             # use the above losses
-            perceptual_loss = content_loss + (beta * adversarial_loss)
+            perceptual_loss = beta * adversarial_loss
 
             # Back-prop loss on Generator
             optimizer_g.zero_grad()
@@ -147,22 +147,24 @@ def train(root_path):
     num_residual_blocks = 16
     num_middle_blocks = 7
 
-    filepath = root_path / "model_checkpoint/aishu/srgan_v0.pth"
-    print(filepath)
-    if filepath.exists():
-        print("checkpoint exists... loading...")
-        generator, discriminator = load_checkpoint(filepath, device)
-    else:
-        (root_path / "model_checkpoint/aishu/").mkdir(parents=True, exist_ok=True)
-        generator = Generator(upscale_factor=upscale_factor,
+    generator = Generator(upscale_factor=upscale_factor,
                             image_channels=image_channels,
                             residual_block_channels=residual_block_channels,
                             num_residual_blocks=num_residual_blocks).to(device)
         
-        discriminator = Discriminator(
+    discriminator = Discriminator(
             image_channels=image_channels,
             num_middle_blocks=num_middle_blocks).to(device)
-    vgg_loss = VGG19Loss(i=5, j=4).to(device).eval()
+
+    filepath = root_path / "model_checkpoint/aishu/srgan_v0.pth"
+    print(filepath)
+
+    if filepath.exists():
+        print("checkpoint exists... loading...")
+        generator, discriminator = load_checkpoint(generator, discriminator, filepath, device)
+    else:
+        (root_path / "model_checkpoint/aishu/").mkdir(parents=True, exist_ok=True)
+    vgg_loss = VGG19Loss(i=5, j=4).to(device).eval() 
 
     print(f"Generator: {sum(param.numel() for param in generator.parameters())}")
     print(f"Discriminator: {sum(param.numel() for param in discriminator.parameters())}")

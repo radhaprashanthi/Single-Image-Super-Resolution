@@ -7,16 +7,16 @@ def save_checkpoint(generator, discriminator, filepath):
         'image_channels': generator.image_channels,
         'residual_block_channels': generator.residual_block_channels,
         'num_residual_blocks': generator.num_residual_blocks,
-        'generator': generator,
-        'discriminator': discriminator,
+        'generator': generator.state_dict(),
+        'discriminator': discriminator.state_dict()
     }
 
     torch.save(checkpoint, filepath)
 
 
-def load_checkpoint(filepath, device):
+def load_checkpoint(generator, discriminator, filepath, device):
     checkpoint = torch.load(filepath, map_location=device)
-    generator = checkpoint['generator']
-    discriminator = checkpoint['discriminator']
+    generator.load_state_dict(checkpoint['generator'])
+    discriminator.load_state_dict(checkpoint['discriminator'])
 
     return generator, discriminator
