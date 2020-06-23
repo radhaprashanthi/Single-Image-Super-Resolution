@@ -130,10 +130,11 @@ def train_model(generator, optimizer_g,
         print(d_add_loss_meter)
         print("\n======================\n")
         save_checkpoint(generator, discriminator, filepath)
+        best_path = Path(str(filepath).replace("v0", "best"))
         if perceptual_loss.item() < best_loss:
             print("better loss, saving the gan")
             best_loss = perceptual_loss.item()
-            save_checkpoint(generator, discriminator, str(filepath).replace("v0", "best"))
+            save_checkpoint(generator, discriminator, best_path)
 
     return generator
 
@@ -158,12 +159,12 @@ def train(root_path):
             num_middle_blocks=num_middle_blocks).to(device)
 
     filepath = root_path / "model_checkpoint/aishu/srgan_v0.pth"
-    best_model = str(filepath).replace("v0", "best")
-    print(filepath, best_model)
+    best_path = Path(str(filepath).replace("v0", "best"))
+    print(filepath, best_path)
 
-    if best_model.exists():
+    if best_path.exists():
         print("checkpoint exists... loading...")
-        generator, discriminator = load_checkpoint(generator, discriminator, best_model, device)
+        generator, discriminator = load_checkpoint(generator, discriminator, best_path, device)
     else:
         (root_path / "model_checkpoint/aishu/").mkdir(parents=True, exist_ok=True)
     vgg_loss = VGG19Loss(i=5, j=4).to(device).eval() 
