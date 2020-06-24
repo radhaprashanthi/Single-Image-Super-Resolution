@@ -86,7 +86,7 @@ def train_model(generator, optimizer_g,
             adversarial_loss = adversarial_loss_criterion(fake,
                                                           torch.ones_like(fake))
             # use the above losses
-            perceptual_loss = beta * adversarial_loss
+            perceptual_loss = content_loss + (beta * adversarial_loss)
 
             # Back-prop loss on Generator
             optimizer_g.zero_grad()
