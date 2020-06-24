@@ -15,7 +15,8 @@ def train_model(model, optimizer,
     iterations = epochs * len(train_dataloader)
     progress = tqdm(total=iterations)
     content_loss_criterion = nn.MSELoss()
-    
+    best_loss = 0.0330
+    #beta = 1e-3
     losses_meter = AverageMeter("MSE loss")
     
     #psnr_meter = AverageMeter("PSNR")
@@ -47,11 +48,19 @@ def train_model(model, optimizer,
             del lr, hr, sr
             progress.update()
             
+        #print("\n======================\n")
         print(epoch, losses_meter)
+        #print("\n======================\n")
         if epoch % save_freq == 0:
             save_checkpoint(model, filepath)
+            
+        if content_loss < best_loss:
+            best_loss = content_loss
+            save_checkpoint(model, "../checkpoints/resnet_best_loss_checkpoint.pth")
+            print("best loss: ", best_loss)
 
     return model
+
 
 def train(root_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
