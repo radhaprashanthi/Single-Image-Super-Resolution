@@ -126,11 +126,14 @@ class SRImageDataset(Dataset):
             crop_size = (int(pil_hr_image.height / 4),
                          int(pil_hr_image.width / 4))
             lr_image = valid_lr_transform(crop_size)(hr_image)
+            lr_real_image = train_lr_transform(self.crop_size, self.upscale_factor)(hr_image)
+            
+            return lr_image, hr_image, lr_real_image
         else:
             hr_image = train_hr_transform(self.crop_size)(pil_hr_image)
             lr_image = train_lr_transform(self.crop_size, self.upscale_factor)(hr_image)
 
-        return lr_image, hr_image
+            return lr_image, hr_image
 
     def __len__(self):
         return len(self.image_filenames)

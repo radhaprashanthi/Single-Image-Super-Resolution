@@ -178,7 +178,7 @@ def train(root_path):
     )
 
     train_dataloader = DataLoader(
-        dataset=train_dataset, batch_size=200,
+        dataset=train_dataset, batch_size=150,
         num_workers=4
     )
 
