@@ -50,12 +50,12 @@ def valid_hr_transform():
     ])
 
 
-def valid_lr_transform(crop_size):
+def valid_lr_transform(crop_size, normalize=True):
     return Compose([
         ToPILImage(),
         Resize(crop_size, interpolation=Image.BICUBIC),
         ToTensor(),
-        Lambda(imagenet_normalise),
+        Lambda(imagenet_normalise) if normalize else Lambda(lambda img: img),
     ])
 
 
@@ -126,7 +126,7 @@ class SRImageDataset(Dataset):
             crop_size = (int(pil_hr_image.height / 4),
                          int(pil_hr_image.width / 4))
             lr_image = valid_lr_transform(crop_size)(hr_image)
-            lr_real_image = train_lr_transform(self.crop_size, self.upscale_factor)(hr_image)
+            lr_real_image = valid_lr_transform(crop_size, normalize=False)(hr_image)
             
             return lr_image, hr_image, lr_real_image
         else:
